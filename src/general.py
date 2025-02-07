@@ -17,7 +17,7 @@ from .types import Grid, JSONTask, GridPairs
 
 from typing import Dict, List, Tuple
 from .types import Grid, GridPairs, JSONTask
-from .general import random_ARC_name
+# from .general import random_ARC_name
 
 
 def adjust_data_format(
