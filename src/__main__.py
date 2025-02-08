@@ -10,5 +10,6 @@ def main(args):
 
 
 if __name__ == "__main__":
+    print("a")
     args = parse_arguments()
     main(args)
