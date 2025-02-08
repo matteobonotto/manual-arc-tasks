@@ -1,6 +1,7 @@
 import itertools
 import os
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union, Optional
+import copy 
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -55,18 +56,25 @@ class ArcPlotter:
         plot_figures_on_canvas(grid_list, task_name).show()
 
     def plot_grid_list(self, grid_list: List[Grid], task_name: str = "") -> FigureType:
-        plot_figures_on_canvas(grid_list, task_name).show()
+        return plot_figures_on_canvas(grid_list, task_name)
 
-    def plot_task(self, task: JSONTask, task_name: str = "") -> FigureType:
+    def plot_task(self, task: JSONTask, task_name: str = "", path: Optional[str]=None) -> FigureType:
+        task_ = copy.deepcopy(task)
+        fake_pair = {
+            "input": [[10, 11, 11], [11, 10, 11], [11, 10, 11]],
+            "output": [[11, 10, 11], [11, 10, 11], [11, 11, 10]],
+        }
+        task_['train'].append(fake_pair)
         training_pair, test_pair = adjust_data_format(
-            [task]
+            [task_]
         )  # -> Tuple[Dict[str, List[Tuple[Grid, Grid]]], Dict[str, List[Tuple[Grid, Grid]]]]
         # task = [training_pair[k] + test_pair[k] for k in training_pair.keys()]
         grid_pairs = next(iter(training_pair.values())) + next(iter(test_pair.values()))
-        self.plot_grid_list(
+        pl = self.plot_grid_list(
             grid_list=[x[0] for x in grid_pairs] + [x[1] for x in grid_pairs],
             task_name=task_name,
         )
+        pl.write_image(path) if path is not None else pl.show()
 
 
 def plot(grid, name: str = "") -> FigureType:
@@ -83,8 +91,8 @@ def plot(grid, name: str = "") -> FigureType:
             colorscale=dcolorscale,
             zmin=0,
             zmax=len(colors) - 1,
-            xgap=3,
-            ygap=3,
+            xgap=1,
+            ygap=1,
             showscale=False,
             name=name,
         )
@@ -200,22 +208,17 @@ class MatplotlibARCPlot:
         assert "train" in task
         assert "test" in task
 
-        if "output" not in task["test"][0].keys():
-            for i in range(len(task["test"])):
-                task["test"][i]["output"] = [[0, 0], [0, 0]]
-
         self.taskname = taskname
         self.savefig = savefig
         self.dirsave = dirsave
 
         # Note: the `fake_pair` is just used to visually separate the
         # train and test pairs
-        # fake_pair = {
-        #     "input": [[10, 10, 10], [10, 10, 10], [10, 10, 10]],
-        #     "output": [[10, 10, 10], [10, 10, 10], [10, 10, 10]],
-        # }
-        # all_pairs = task["train"] + [fake_pair] + task["test"]
-        all_pairs = task["train"] + task["test"]
+        fake_pair = {
+            "input": [[0, 10, 10], [10, 0, 10], [10, 0, 10]],
+            "output": [[10, 0, 10], [10, 0, 10], [10, 10, 0]],
+        }
+        all_pairs = task["train"] + [fake_pair] + task["test"]
         self.plot_pairs(
             all_pairs,
             title,
@@ -299,16 +302,14 @@ class MatplotlibARCPlot:
         fig, ax = plt.subplots(
             2, num_pairs, figsize=(plot_size * num_pairs, plot_size * 2)
         )
-        fig.suptitle(title, fontsize=10)
+        fig.suptitle(title, fontsize=7)
 
         for index, pair in enumerate(pairs):
-            split = "test" if index == (len(pairs) - 1) else "demo"
             input_image = self._get_arc_image(pair["input"])
             ax[0, index].imshow(input_image)
             self._draw_grid_lines(
                 ax[0, index], input_image, grid_lines_width, grid_lines_color
             )
-            ax[0, index].set_title(f"{split} input", fontsize=7)
             ax[0, index].axis("off")
 
             output_image = self._get_arc_image(pair["output"])
@@ -316,7 +317,6 @@ class MatplotlibARCPlot:
             self._draw_grid_lines(
                 ax[1, index], output_image, grid_lines_width, grid_lines_color
             )
-            ax[1, index].set_title(f"{split} output", fontsize=7)
             ax[1, index].axis("off")
 
         fig.tight_layout()
@@ -339,7 +339,7 @@ class MatplotlibARCPlot:
         fig, ax = plt.subplots(
             2, num_pairs, figsize=(plot_size * num_pairs, plot_size * 2)
         )
-        fig.suptitle(title, fontsize=10)
+        fig.suptitle(title, fontsize=14)
 
         pair = pairs[0]
         input_image = self._get_arc_image(pair["input"])
@@ -355,8 +355,8 @@ class MatplotlibARCPlot:
         fig.tight_layout()
 
         if self.savefig:
-            touch_dir(self.dirsave)
-            fig.savefig(os.path.join(self.dirsave, self.taskname), dpi=150)
+            touch_dir(self.savedir)
+            fig.savefig(os.path.join(self.savedir, self.taskname), dpi=150)
             plt.close(fig)
 
     @staticmethod
