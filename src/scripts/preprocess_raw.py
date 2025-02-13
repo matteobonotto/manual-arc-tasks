@@ -45,9 +45,10 @@ if __name__ == "__main__":
             task=task, title=id, taskname=id, savefig=True, dirsave=f"{data_dir}/preprocessed/"
         )
 
-
     for file in Path(f"{data_dir}/raw").iterdir():
         try:
             os.unlink(file)
         except:
             pass
+
+    # push to hf hub
