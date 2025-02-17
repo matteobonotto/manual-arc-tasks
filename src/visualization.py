@@ -1,7 +1,7 @@
 import itertools
 import os
 from typing import Any, Dict, List, Tuple, Union, Optional
-import copy 
+import copy
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -58,13 +58,15 @@ class ArcPlotter:
     def plot_grid_list(self, grid_list: List[Grid], task_name: str = "") -> FigureType:
         return plot_figures_on_canvas(grid_list, task_name)
 
-    def plot_task(self, task: JSONTask, task_name: str = "", path: Optional[str]=None) -> FigureType:
+    def plot_task(
+        self, task: JSONTask, task_name: str = "", path: Optional[str] = None
+    ) -> FigureType:
         task_ = copy.deepcopy(task)
         fake_pair = {
             "input": [[10, 11, 11], [11, 10, 11], [11, 10, 11]],
             "output": [[11, 10, 11], [11, 10, 11], [11, 11, 10]],
         }
-        task_['train'].append(fake_pair)
+        task_["train"].append(fake_pair)
         training_pair, test_pair = adjust_data_format(
             [task_]
         )  # -> Tuple[Dict[str, List[Tuple[Grid, Grid]]], Dict[str, List[Tuple[Grid, Grid]]]]

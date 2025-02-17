@@ -1,9 +1,9 @@
-
 from argparse import ArgumentParser
 
 
 def parse_arguments():
     pass
+
 
 def main(args):
     pass
