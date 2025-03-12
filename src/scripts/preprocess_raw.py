@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 import json
 import random
-from string import ascii_lowercase
+from string import ascii_letters
 import shutil
 from tqdm import tqdm
 from typing import TypeAlias, List, Dict, Set
@@ -15,7 +15,7 @@ JSONTask: TypeAlias = Dict[str, List[Dict[str, List[List[int]]]]]
 
 # PWD = "gen_tasks/raw"
 DIGITS = [str(x) for x in range(10)]
-LETTERS = list(ascii_lowercase)
+LETTERS = list(ascii_letters)
 
 
 def arc_name(n: int = 10) -> str:
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     # filter duplicates
     unique_tasks = {
-        f"mb_{arc_name(13)}": json.loads(x.replace("'", '"'))
+        f"mb_{arc_name(10)}": json.loads(x.replace("'", '"'))
         for x in set([str(y) for y in tasks.values()])
     }
 
